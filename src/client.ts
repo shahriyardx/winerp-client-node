@@ -139,7 +139,7 @@ export class Client {
 	 */
 	inform = ({ destinations, data }: InformPayload): void => {
 		if (!this._authorized) throw new Error("The client is not authorized.")
-		if (!this._on_hold) throw new Error("The client is on hold")
+		if (this._on_hold) throw new Error("The client is on hold")
 
 		this.client.send(
 			new MessagePayload({
@@ -174,7 +174,7 @@ export class Client {
 		timeout = 60,
 	}: RequestProps): Promise<T> => {
 		if (!this._authorized) throw new Error("The client is not authorized.")
-		if (!this._on_hold) throw new Error("The client is on hold")
+		if (this._on_hold) throw new Error("The client is on hold")
 
 		return new Promise((resolve) => {
 			const uuid = uuid4()
