@@ -4,13 +4,13 @@
 	"main": "index.js",
 	"license": "MIT",
 	"dependencies": {
-		"@biomejs/biome": "^1.8.3",
 		"express": "^4.19.2",
 		"uuid": "^10.0.0",
 		"ws": "^8.18.0"
 	},
 	"devDependencies": {
 		"@types/bun": "latest",
+		"@biomejs/biome": "^1.8.3",
 		"@types/uuid": "^10.0.0"
 	},
 	"peerDependencies": {

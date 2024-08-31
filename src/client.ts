@@ -28,7 +28,7 @@ export class Client {
 		this
 	}
 
-	__verify = () => {
+	__verify = (): void => {
 		this.client.send(
 			JSON.stringify({
 				id: this.local_name,
@@ -38,15 +38,15 @@ export class Client {
 		)
 	}
 
-	handleConnect = () => {
+	handleConnect = (): void => {
 		this.__verify()
 	}
 
-	handleDisconnect = (event: Event) => {
+	handleDisconnect = (event: Event): void => {
 		console.log("Disconnected", event)
 	}
 
-	handleMessage = (event: MessageEvent) => {
+	handleMessage = (event: MessageEvent): void => {
 		const data = JSON.parse(event.data as string) as MessagePayload
 
 		if (data.type === Paylods.success) {
@@ -70,7 +70,8 @@ export class Client {
 					uuid: data.uuid,
 				})
 
-				return this.client.send(payload.toString())
+				this.client.send(payload.toString())
+				return
 			}
 
 			route(data.data)
@@ -97,7 +98,7 @@ export class Client {
 				})
 		}
 	}
-	inform = ({ destinations, data }: InformPayload) => {
+	inform = ({ destinations, data }: InformPayload): void => {
 		this.client.send(
 			new MessagePayload({
 				type: Paylods.information,
@@ -106,7 +107,7 @@ export class Client {
 			}).toString(),
 		)
 	}
-	request = ({ destination, route, data, timeout = 60 }: RequestProps) => {
+	request = <T>({ destination, route, data, timeout = 60 }: RequestProps): Promise<T> => {
 		return new Promise((resolve) => {
 			const uuid = uuid4()
 			const payload = new MessagePayload({
@@ -127,11 +128,11 @@ export class Client {
 					if (data.type === Paylods.response) {
 						this.client.removeEventListener("message", respond)
 						clearTimeout(_timeout)
-						resolve(data.data)
+						resolve(data.data as T)
 					} else if (data.type === Paylods.error) {
 						this.client.removeEventListener("message", respond)
 						clearTimeout(_timeout)
-						resolve(null)
+						resolve(null as T)
 					}
 				}
 			}
@@ -140,12 +141,12 @@ export class Client {
 
 			const _timeout = setTimeout(() => {
 				this.client.removeEventListener("message", respond)
-				resolve(null)
+				resolve(null as T)
 			}, timeout * 1000)
 		})
 	}
 
-	route = (name: string, handler: RouteHandler) => {
+	route = (name: string, handler: RouteHandler): void => {
 		this.routes.set(name, handler)
 	}
 }

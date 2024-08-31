@@ -29,7 +29,7 @@ export type InformPayload = {
 }
 
 export type RouteHandler = (
-	data: Record<string, unknown> | string ,
+	data: Record<string, unknown> | string,
 ) => Promise<Record<string, unknown> | string>
 
 export class MessagePayload {
