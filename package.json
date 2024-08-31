@@ -1,0 +1,19 @@
+{
+	"name": "winerp-client-node",
+	"version": "1.0.0",
+	"main": "index.js",
+	"license": "MIT",
+	"dependencies": {
+		"@biomejs/biome": "^1.8.3",
+		"express": "^4.19.2",
+		"uuid": "^10.0.0",
+		"ws": "^8.18.0"
+	},
+	"devDependencies": {
+		"@types/bun": "latest",
+		"@types/uuid": "^10.0.0"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	}
+}
