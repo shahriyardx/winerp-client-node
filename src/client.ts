@@ -19,6 +19,8 @@ export class Client {
 	private _on_hold: boolean
 	private local_name: string
 
+	is_connected: boolean
+
 	/**
 	 * Creates an instance of Client.
 	 * @param {ClientProps} props - The properties required to initialize the client.
@@ -27,6 +29,7 @@ export class Client {
 		this.client = new WebSocket(`ws://${host}:${port}`)
 		this._authorized = false
 		this._on_hold = false
+		this.is_connected = false
 		this.local_name = local_name
 		this.routes = new Map()
 		this.client.addEventListener("message", this.handleMessage)
@@ -55,6 +58,7 @@ export class Client {
 	 */
 	handleConnect = (): void => {
 		this.__verify()
+		this.is_connected = true
 	}
 
 	/**
