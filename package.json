@@ -5,7 +5,8 @@
 	"license": "MIT",
 	"devDependencies": {
 		"@biomejs/biome": "^1.8.3",
-		"@types/uuid": "^10.0.0"
+		"@types/uuid": "^10.0.0",
+		"@types/ws": "^8.5.12"
 	},
 	"dependencies": {
 		"uuid": "^10.0.0",
