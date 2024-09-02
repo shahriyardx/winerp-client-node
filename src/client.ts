@@ -13,11 +13,13 @@ import {
  * Class representing a WebSocket client.
  */
 export class Client {
-	private client: WebSocket
+	private static connection: WebSocket
 	private routes: Map<string, RouteHandler>
 	private _authorized: boolean
 	private _on_hold: boolean
 	private local_name: string
+	private host: string
+	private port: string
 
 	is_connected: boolean
 
@@ -26,16 +28,28 @@ export class Client {
 	 * @param {ClientProps} props - The properties required to initialize the client.
 	 */
 	constructor({ host, port, local_name }: ClientProps) {
-		this.client = new WebSocket(`ws://${host}:${port}`)
+		this.host = host
+		this.port = port
 		this._authorized = false
 		this._on_hold = false
 		this.is_connected = false
 		this.local_name = local_name
 		this.routes = new Map()
-		this.client.addEventListener("message", this.handleMessage)
-		this.client.addEventListener("open", this.handleConnect)
-		this.client.addEventListener("close", this.handleDisconnect)
-		this
+
+		this.__connect()
+	}
+
+	/**
+	 * connects to the websocket client
+	 * @private
+	 */
+	__connect = (): void => {
+		if (!Client.connection) {
+			Client.connection = new WebSocket(`ws://${this.host}:${this.port}`)
+			Client.connection.addEventListener("message", this.handleMessage)
+			Client.connection.addEventListener("open", this.handleConnect)
+			Client.connection.addEventListener("close", this.handleDisconnect)
+		}
 	}
 
 	/**
@@ -43,7 +57,7 @@ export class Client {
 	 * @private
 	 */
 	__verify = (): void => {
-		this.client.send(
+		Client.connection.send(
 			JSON.stringify({
 				id: this.local_name,
 				uuid: uuid4(),
@@ -99,7 +113,7 @@ export class Client {
 					uuid: data.uuid,
 				})
 
-				this.client.send(payload.toString())
+				Client.connection.send(payload.toString())
 				return
 			}
 
@@ -111,13 +125,13 @@ export class Client {
 						data: res,
 					})
 
-					this.client.send(payload.toString())
+					Client.connection.send(payload.toString())
 				})
 				.catch((error) => {
 					let error_message = "Internal Server Error"
 					if (error instanceof Error) error_message = error.message
 
-					this.client.send(
+					Client.connection.send(
 						new MessagePayload({
 							id: this.local_name,
 							type: Paylods.error,
@@ -145,7 +159,7 @@ export class Client {
 		if (!this._authorized) throw new Error("The client is not authorized.")
 		if (this._on_hold) throw new Error("The client is on hold")
 
-		this.client.send(
+		Client.connection.send(
 			new MessagePayload({
 				type: Paylods.information,
 				route: Array.isArray(destinations) ? destinations : [destinations],
@@ -191,28 +205,28 @@ export class Client {
 				uuid: uuid,
 			})
 
-			this.client.send(payload.toString())
+			Client.connection.send(payload.toString())
 
 			const respond = (event: MessageEvent) => {
 				const data = JSON.parse(event.data as string) as MessagePayload
 
 				if (data.uuid === uuid) {
 					if (data.type === Paylods.response) {
-						this.client.removeEventListener("message", respond)
+						Client.connection.removeEventListener("message", respond)
 						clearTimeout(_timeout)
 						resolve(data.data as T)
 					} else if (data.type === Paylods.error) {
-						this.client.removeEventListener("message", respond)
+						Client.connection.removeEventListener("message", respond)
 						clearTimeout(_timeout)
 						resolve(null as T)
 					}
 				}
 			}
 
-			this.client.addEventListener("message", respond)
+			Client.connection.addEventListener("message", respond)
 
 			const _timeout = setTimeout(() => {
-				this.client.removeEventListener("message", respond)
+				Client.connection.removeEventListener("message", respond)
 				resolve(null as T)
 			}, timeout * 1000)
 		})
